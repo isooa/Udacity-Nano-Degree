@@ -1,0 +1,46 @@
+Question 1
+
+select distinct f.title, c.name, count(*) over (partition by f.title ) from category c
+join film_category  fc
+on c.category_id=fc.category_id
+join film f
+on f.film_id=fc.film_id
+join inventory i
+on i.film_id=f.film_id
+join rental r
+on r.inventory_id = i.inventory_id
+where c.name in ('Animation', 'Children', 'Classics', 'Comedy', 'Family', 'Music')
+Order by c.name
+
+
+Question 2
+
+select f.title, c.name, rental_duration, ntile(4) over (partition by rental_duration)
+from category c
+join film_category  fc
+on c.category_id=fc.category_id
+join film f
+on f.film_id=fc.film_id
+where c.name in ('Animation', 'Children', 'Classics', 'Comedy', 'Family', 'Music')
+
+Option 2 Question 2
+
+select f.title, c.name, rental_duration, ntile(4) over (order by rental_duration)
+from category c
+join film_category  fc
+on c.category_id=fc.category_id
+join film f
+on f.film_id=fc.film_id
+where c.name in ('Animation', 'Children', 'Classics', 'Comedy', 'Family', 'Music')
+
+Question 3
+
+select distinct category_name, quartile, count(1) over (partition by category_name,quartile)
+from(select c.name as category_name, ntile(4) over (order by rental_duration) as quartile
+from category c
+join film_category  fc
+on c.category_id=fc.category_id
+join film f
+on f.film_id=fc.film_id
+where c.name in ('Animation', 'Children', 'Classics', 'Comedy', 'Family', 'Music'))sub
+order by 1,2
