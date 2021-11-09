@@ -52,8 +52,8 @@ Question 1
 
 select date_part ('month', rental_date) rental_month, date_part('year', rental_date) rental_year, store_id, count(1)
 from rental r
-join inventory i 
-on r.inventory_id=i.inventory_id
+join staff s 
+on r.staff_id=s.staff_id
 group by 1,2,3 
 order by 4 desc
 
