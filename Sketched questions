@@ -22,3 +22,43 @@ JOIN (SELECT category_name, SUM(rental_count) total_rental_for_category
 	 FROM common_table
 	 GROUP BY category_name) s1
 ON s1.category_name=c.category_name
+
+
+Final conclusion for visualization 1
+
+/* Udacity 1st project: Investigate a Relational Database */
+
+/* Question 1:
+We want to understand more about the movies that families are watching. 
+The following categories are considered family movies: Animation, Children, Classics, Comedy, Family and Music.
+For each category, there are movies who have maximum rentals. 
+Create a query to get a percentage of the total rentals for each category contributed by the rentals of the highest renting movies.
+
+Solution: */
+
+WITH common_table AS 
+(SELECT DISTINCT f.title film_name, c.name category_name, COUNT(*) OVER (PARTITION BY f.title ) rental_count 
+FROM category c
+JOIN film_category  fc
+ON c.category_id=fc.category_id
+JOIN film f
+ON f.film_id=fc.film_id
+JOIN inventory i
+ON i.film_id=f.film_id
+JOIN rental r
+ON r.inventory_id = i.inventory_id
+WHERE c.name in ('Animation', 'Children', 'Classics', 'Comedy', 'Family', 'Music'))
+
+SELECT DISTINCT c.category_name "category name", COUNT(rental_count) OVER(PARTITION BY c.category_name)  AS "no movies with max rentals", rental_count AS "category max rental", rental_count*COUNT(rental_count) OVER(PARTITION BY c.category_name) "rental contribution from max movies", (rental_count*COUNT(rental_count) OVER(PARTITION BY c.category_name) )/total_rental_for_category AS "% contribution from maximum movies to total", total_rental_for_category "category total" 
+FROM common_table c
+JOIN (SELECT DISTINCT category_name, MAX(rental_count) OVER (PARTITION BY category_name) max_rental_count_per_category
+		FROM common_table) s
+ON c.category_name=s.category_name AND c.rental_count=s.max_rental_count_per_category
+JOIN (SELECT category_name, SUM(rental_count) total_rental_for_category
+	 FROM common_table
+	 GROUP BY category_name) s1
+ON s1.category_name=c.category_name
+ORDER BY 5 DESC
+
+
+
