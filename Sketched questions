@@ -1,0 +1,24 @@
+The code produces the total rentals per category alongside the movies with the maximum rentals in those categories
+
+WITH common_table AS 
+(SELECT DISTINCT f.title film_name, c.name category_name, COUNT(*) OVER (PARTITION BY f.title ) rental_count 
+FROM category c
+JOIN film_category  fc
+ON c.category_id=fc.category_id
+JOIN film f
+ON f.film_id=fc.film_id
+JOIN inventory i
+ON i.film_id=f.film_id
+JOIN rental r
+ON r.inventory_id = i.inventory_id)
+--WHERE c.name in ('Animation', 'Children', 'Classics', 'Comedy', 'Family', 'Music'))
+
+SELECT film_name, c.category_name category_name, rental_count, total_rental_for_category
+FROM common_table c
+JOIN (SELECT DISTINCT category_name, MAX(rental_count) OVER (PARTITION BY category_name) max_rental_count_per_category
+		FROM common_table) s
+ON c.category_name=s.category_name AND c.rental_count=s.max_rental_count_per_category
+JOIN (SELECT category_name, SUM(rental_count) total_rental_for_category
+	 FROM common_table
+	 GROUP BY category_name) s1
+ON s1.category_name=c.category_name
