@@ -61,4 +61,30 @@ ON s1.category_name=c.category_name
 ORDER BY 5 DESC
 
 
+/*
+Question 2:
+We would like to know the highest sales for each renting month for each store.
+Create a query to find the month with the highest sales for each store resulting from movies rented in a particular month.
+Your query should contain the month name, the store id and the total payments made resulting from those rentals
+Solution: */
+
+SELECT DISTINCT  TO_CHAR(r.rental_date,'Month') "Month name", s.store_id "Store ID", sum(p.amount) over (partition by date_part('month',rental_date) , s.store_id) "Total sales from rentals"
+FROM category c
+JOIN film_category  fc
+ON c.category_id=fc.category_id
+JOIN film f
+ON f.film_id=fc.film_id
+JOIN inventory i
+ON i.film_id=f.film_id
+JOIN rental r
+ON r.inventory_id = i.inventory_id
+JOIN payment p
+ON p.customer_id=r.customer_id
+JOIN staff s
+ON r.staff_id=s.staff_id
+ORDER BY 3 DESC
+
+
+
+
 
